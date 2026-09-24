@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Convalt Energy — 3D Storytelling Concept</title>
+<meta name="description" content="Convalt Energy 3D storytelling landing page concept.">
+<style>
+:root{
+  --ink:#17201d; --muted:#68716d; --paper:#f2f0e9; --line:rgba(23,32,29,.14);
+  --accent:#c7e56c; --white:#fbfaf5;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body:before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 70% 45%,transparent 0 28%,rgba(242,240,233,.13) 62%,rgba(242,240,233,.5) 100%)}
+header{position:fixed;z-index:10;top:0;left:0;right:0;height:88px;display:flex;align-items:center;justify-content:space-between;padding:0 4.5vw;mix-blend-mode:multiply}
+.logo{font-size:14px;font-weight:800;letter-spacing:.2em}.logo span{font-weight:400;opacity:.6}
+.nav{display:flex;gap:28px;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.nav a{color:inherit;text-decoration:none}.menu{display:none;border:1px solid var(--line);border-radius:50%;width:42px;height:42px;background:transparent}
+.progress{position:fixed;z-index:11;left:4.5vw;top:50%;transform:translateY(-50%);display:grid;gap:13px}
+.progress button{width:8px;height:8px;border:0;border-radius:50%;padding:0;background:rgba(23,32,29,.2);cursor:pointer;transition:.3s}
+.progress button.active{transform:scale(1.8);background:var(--ink)}
+.hud{position:fixed;z-index:8;right:4.5vw;bottom:30px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.story{position:relative;z-index:2}
+.chapter{min-height:100vh;display:flex;align-items:center;padding:12vh 10vw 12vh 12vw}
+.copy{width:min(530px,48vw)} .eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+h1,h2{font-weight:500;letter-spacing:-.045em;line-height:.96;margin:0 0 24px}
+h1{font-size:clamp(58px,8vw,128px);max-width:850px}.chapter h2{font-size:clamp(48px,6vw,92px)}
+p{font-size:16px;line-height:1.65;color:#59615e;max-width:470px}
+.hero{align-items:flex-end;padding-bottom:15vh}.hero .copy{width:min(720px,75vw)}
+.hero h1 em{font-style:normal;display:block;color:#68716d}
+.meta{display:flex;gap:30px;margin-top:36px;font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.meta strong{font-size:18px;letter-spacing:0;font-weight:500;display:block;margin-top:7px}
+.tag{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:100px;padding:9px 13px;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.tag i{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
+.chapter .number{font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:18px}
+.split{margin-left:auto;align-self:flex-end;max-width:360px}
+.business-list{margin-top:30px;border-top:1px solid var(--line)}
+.business{display:flex;align-items:center;justify-content:space-between;padding:17px 0;border-bottom:1px solid var(--line);font-size:13px}
+.business small{color:var(--muted);font-size:10px;letter-spacing:.12em}
+.cta{display:inline-flex;margin-top:34px;padding:13px 18px;background:var(--ink);color:var(--white);text-decoration:none;border-radius:100px;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.footer{min-height:70vh;display:flex;align-items:flex-end;padding:12vh 10vw 7vh 12vw}
+.footer .copy{width:100%;display:flex;justify-content:space-between;gap:50px;align-items:end}
+.footer h2{font-size:clamp(44px,6vw,84px)}
+.fade{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}.in .fade{opacity:1;transform:none}
+@media(max-width:800px){
+  header{height:70px;padding:0 22px}.nav{display:none}.menu{display:block}
+  .progress{left:18px}.hud{right:20px;bottom:20px}
+  .chapter{padding:92px 24px 110px 52px;align-items:flex-end}.copy{width:100%;max-width:520px}
+  .hero{align-items:flex-end}.hero h1{font-size:clamp(52px,15vw,86px)}
+  .chapter h2{font-size:clamp(46px,13vw,70px)} p{font-size:14px}
+  .split{display:none}.meta{gap:20px}.business{padding:15px 0}
+  .footer{padding:90px 24px 60px 52px}.footer .copy{display:block}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fade{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<header>
+  <div class="logo">CONVALT <span>ENERGY</span></div>
+  <nav class="nav">
+    <a href="#story">Explore</a><a href="#business">Businesses</a><a href="#future">Future</a><a href="#contact">Contact ↗</a>
+  </nav>
+  <button class="menu" aria-label="Menu">☰</button>
+</header>
+
+<div class="progress" aria-label="Story chapters">
+  <button class="active" data-go="0"></button><button data-go="1"></button><button data-go="2"></button><button data-go="3"></button><button data-go="4"></button>
+</div>
+<div class="hud">Scroll to explore · <span id="chapterNo">01</span> / 05</div>
+
+<main class="story" id="story">
+<section class="chapter hero" data-scene="0">
+  <div class="copy">
+    <div class="tag fade"><i></i> An integrated energy company</div>
+    <h1 class="fade">Building the energy <em>of tomorrow.</em></h1>
+    <p class="fade">American manufacturing. Global energy development. Integrated AI infrastructure.</p>
+    <div class="meta fade"><div>01<strong>Origin</strong></div><div>03D<strong>Story</strong></div><div>∞<strong>Connected</strong></div></div>
+  </div>
+</section>
+
+<section class="chapter" data-scene="1" id="business">
+  <div class="copy">
+    <div class="number fade">02 / THE VALUE CHAIN</div>
+    <h2 class="fade">One connected vision.</h2>
+    <p class="fade">From the components that capture energy to the infrastructure that puts it to work, four businesses move as one integrated system.</p>
+  </div>
+  <div class="split fade">
+    <div class="business-list">
+      <div class="business"><span>01 / Manufacturing</span><small>Solar supply chain ↗</small></div>
+      <div class="business"><span>02 / Power Generation</span><small>Renewable projects ↗</small></div>
+      <div class="business"><span>03 / Data Centers</span><small>Digital infrastructure ↗</small></div>
+      <div class="business"><span>04 / Recycling</span><small>Circular solar ↗</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" data-scene="2">
+  <div class="copy">
+    <div class="number fade">03 / MANUFACTURING</div>
+    <h2 class="fade">Engineered from the inside out.</h2>
+    <p class="fade">A solar module becomes the story: layers separate, align and reconnect as the camera moves through the architecture.</p>
+    <a class="cta fade" href="#business">Explore the system ↗</a>
+  </div>
+</section>
+
+<section class="chapter" data-scene="3">
+  <div class="copy">
+    <div class="number fade">04 / INFRASTRUCTURE</div>
+    <h2 class="fade">Power for the physical and digital world.</h2>
+    <p class="fade">Generation, land, cooling, connectivity and data infrastructure converge into one quiet visual system.</p>
+  </div>
+</section>
+
+<section class="chapter" data-scene="4" id="future">
+  <div class="copy">
+    <div class="number fade">05 / THE NEXT CHAPTER</div>
+    <h2 class="fade">Built for what comes next.</h2>
+    <p class="fade">A 50-year horizon. Sustainable growth. Meaningful employment. Infrastructure designed for the next generation.</p>
+    <a class="cta fade" href="#contact">Connect with Convalt ↗</a>
+  </div>
+</section>
+
+<section class="footer" id="contact">
+  <div class="copy">
+    <div><div class="eyebrow">CONVALT ENERGY</div><h2>Let's build what<br>comes next.</h2></div>
+    <div><p>3D storytelling concept · Responsive WebGL landing experience</p><div class="tag"><i></i> Prototype / Staging</div></div>
+  </div>
+</section>
+</main>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js';
+
+const canvas=document.querySelector('#scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.5,10);
+
+scene.add(new THREE.HemisphereLight(0xf8f5e9,0x25312c,2.2));
+const key=new THREE.DirectionalLight(0xffffff,3); key.position.set(4,7,8); scene.add(key);
+
+const world=new THREE.Group(); scene.add(world);
+const materials={
+  dark:new THREE.MeshStandardMaterial({color:0x27332e,roughness:.48,metalness:.35}),
+  glass:new THREE.MeshPhysicalMaterial({color:0xdfe9dd,roughness:.12,metalness:.05,transmission:.25,transparent:true,opacity:.78}),
+  lime:new THREE.MeshStandardMaterial({color:0xc7e56c,roughness:.35,metalness:.1}),
+  silver:new THREE.MeshStandardMaterial({color:0xb9beb9,roughness:.25,metalness:.75}),
+  warm:new THREE.MeshStandardMaterial({color:0xd9d1bb,roughness:.7,metalness:.05})
+};
+
+const solar=new THREE.Group(); world.add(solar);
+const frame=new THREE.Mesh(new THREE.BoxGeometry(5.8,.18,3.5),materials.dark); solar.add(frame);
+const panel=new THREE.Mesh(new THREE.BoxGeometry(5.5,.08,3.2),materials.glass); panel.position.y=.13; solar.add(panel);
+for(let x=-2.2;x<=2.2;x+=.55){
+  const line=new THREE.Mesh(new THREE.BoxGeometry(.025,.035,3.15),materials.silver); line.position.set(x,.19,0); solar.add(line);
+}
+for(let z=-1.2;z<=1.2;z+=.6){
+  const line=new THREE.Mesh(new THREE.BoxGeometry(5.45,.035,.025),materials.silver); line.position.set(0,.19,z); solar.add(line);
+}
+for(let i=-2;i<=2;i++){
+  const cell=new THREE.Mesh(new THREE.BoxGeometry(.42,.045,.42),materials.dark);
+  cell.position.set(i*.92,.22,0); solar.add(cell);
+}
+
+const core=new THREE.Group(); world.add(core);
+const ring1=new THREE.Mesh(new THREE.TorusGeometry(2.7,.035,12,96),materials.lime); ring1.rotation.x=Math.PI/2; core.add(ring1);
+const ring2=new THREE.Mesh(new THREE.TorusGeometry(2.1,.025,12,96),materials.silver); ring2.rotation.y=Math.PI/2; core.add(ring2);
+const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(1.25,2),materials.glass); core.add(orb);
+for(let i=0;i<16;i++){
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(.18,.18,1.5),materials.dark);
+  const a=i/16*Math.PI*2; bar.position.set(Math.cos(a)*2.2,Math.sin(a)*1.1,Math.sin(a)*1.7); bar.rotation.y=-a; core.add(bar);
+}
+
+const data=new THREE.Group(); world.add(data);
+for(let i=0;i<11;i++){
+  const h=.7+(i%5)*.42;
+  const b=new THREE.Mesh(new THREE.BoxGeometry(.7,h,.7),i%3===0?materials.lime:materials.dark);
+  b.position.set((i-5)*.9,h/2-1,Math.sin(i*1.7)*1.1); data.add(b);
+}
+const recycling=new THREE.Group(); world.add(recycling);
+for(let i=0;i<12;i++){
+  const a=i/12*Math.PI*2;
+  const b=new THREE.Mesh(new THREE.BoxGeometry(.5,.22,.9),i%2?materials.silver:materials.lime);
+  b.position.set(Math.cos(a)*3.1,Math.sin(a)*2.1-.2,Math.sin(a)*1.5);
+  b.lookAt(0,0,0); recycling.add(b);
+}
+
+function resetGroups(){
+  [solar,core,data,recycling].forEach(g=>g.visible=true);
+}
+let targetScene=0, currentScene=0, scrollT=0;
+const chapters=[...document.querySelectorAll('.chapter')];
+const buttons=[...document.querySelectorAll('.progress button')];
+const no=document.querySelector('#chapterNo');
+
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); targetScene=+e.target.dataset.scene; no.textContent=String(targetScene+1).padStart(2,'0'); buttons.forEach((b,i)=>b.classList.toggle('active',i===targetScene));}});
+},{threshold:.55});
+chapters.forEach(c=>io.observe(c));
+buttons.forEach(b=>b.onclick=()=>chapters[+b.dataset.go].scrollIntoView({behavior:'smooth'}));
+
+function animate(t){
+  requestAnimationFrame(animate);
+  const dt=t*.0002;
+  currentScene += (targetScene-currentScene)*.045;
+  world.rotation.y += .0015;
+  world.position.y=Math.sin(dt*2)*.12;
+  solar.position.set(0,0,0); solar.rotation.set(-.32+currentScene*.45,.18+currentScene*.2,.08);
+  core.position.set(0,.1,0); core.rotation.set(currentScene*.25,currentScene*.7,0);
+  data.position.set(0,-.25,0); data.rotation.y=-currentScene*.35;
+  recycling.rotation.z=currentScene*.8;
+  solar.visible=currentScene<2.3;
+  core.visible=currentScene>0.7 && currentScene<4.2;
+  data.visible=currentScene>2.1;
+  recycling.visible=currentScene>3.0;
+  const mobile=innerWidth<800;
+  const s=mobile?.78:1;
+  world.scale.setScalar(s);
+  world.position.x=mobile?.8:1.8;
+  camera.position.z=10-currentScene*.55;
+  camera.position.x=Math.sin(currentScene*.7)*.55;
+  camera.lookAt(world.position.x,0,0);
+  renderer.render(scene,camera);
+}
+animate(0);
+
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.7)); renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
